@@ -1,6 +1,7 @@
 ## this is a bare bones unofficial python library for the ecocash api by Tarmica Sean Chiwara
 ### the library aims to makes it easier for python devs (especially newbies) to rapidly integrate with the ecocash api using pythonic idioms they are already familiar with.
 
+__version__ = "0.0.4"
 
 import requests
 import uuid
@@ -59,7 +60,13 @@ class EcoCash:
         try:
             response = requests.post(url, json=payload, headers=self.headers)
             response.raise_for_status()
-            data = response.json()
+            try:
+                # Attempt to parse JSON
+                data = response.json()
+            except ValueError:
+                # Handle empty or non-JSON responses gracefully because last time that gave me a headache!
+                logger.warning(f"Empty or non-JSON response: {response.text}")
+                data = {"status_code": response.status_code, "response_text": response.text}
             logger.info(f"Response: {data}")
             return data
         except requests.HTTPError as e:
@@ -68,9 +75,7 @@ class EcoCash:
         except requests.RequestException as e:
             logger.error(f"Request failed: {str(e)}")
             return {"error": str(e)}
-        except ValueError:
-            logger.error(f"Failed to parse JSON response: {response.text}")
-            return {"error": "Invalid JSON response", "status_code": response.status_code}
+
 
     # ========================
     # Payments
