@@ -1,7 +1,7 @@
 ## this is a bare bones unofficial python library for the ecocash api by Tarmica Sean Chiwara
 ### the library aims to makes it easier for python devs (especially newbies) to rapidly integrate with the ecocash api using pythonic idioms they are already familiar with.
 
-__version__ = "0.0.5"
+__version__ = "0.0.6"
 
 import requests
 import uuid
@@ -80,7 +80,7 @@ class EcoCash:
     # ========================
     # Payments
     # ========================
-    def initiate_payment(self, customer_msisdn: str, amount: float, reason: str,
+    def initiate_payment(self, customer_msisdn: str, amount: float, reason: str = "Payment for goods",
                 currency: str = "USD", source_reference: Optional[str] = None) -> Dict[str, Any]:
         """
         Initiate a C2B payment.
@@ -98,6 +98,10 @@ class EcoCash:
         if not source_reference:
             source_reference = str(uuid.uuid4())
             logger.info(f"Generated sourceReference: {source_reference}")
+
+        if not reason:
+            logger.warning("No reason provided for payment, using default.")
+            reason = "Payment for goods"
 
         payload = {
             "customerMsisdn": customer_msisdn,
